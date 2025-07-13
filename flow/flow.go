@@ -2,25 +2,25 @@ package goflow
 
 // Flow orchestrates node execution (like PocketFlow's Flow)
 type Flow struct {
-	*BaseNode
-	startNode Node
+	*Node
+	startNode *Node
 }
 
 // NewFlow creates a new flow
 func NewFlow() *Flow {
 	return &Flow{
-		BaseNode: NewBaseNode(),
+		Node: NewNode(),
 	}
 }
 
 // Start sets the starting node
-func (f *Flow) Start(node Node) *Flow {
+func (f *Flow) Start(node *Node) *Flow {
 	f.startNode = node
 	return f
 }
 
 // StartNode returns the current start node
-func (f *Flow) StartNode() Node {
+func (f *Flow) StartNode() *Node {
 	return f.startNode
 }
 
@@ -47,7 +47,7 @@ func (f *Flow) Run(shared *SharedState) string {
 }
 
 // getNextNode gets the next node based on action (like PocketFlow's get_next_node)
-func (f *Flow) getNextNode(curr Node, action string) Node {
+func (f *Flow) getNextNode(curr *Node, action string) *Node {
 	if action == "" {
 		action = "default"
 	}
