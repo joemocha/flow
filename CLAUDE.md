@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-GoFlow is a revolutionary workflow orchestration library that evolved from a traditional OOP approach to a single adaptive node system. It represents an advancement of PocketFlow's constraint-based philosophy, providing parameter-driven behavior composition for building AI agents, complex workflows, and data processing pipelines.
+Flow is a revolutionary workflow orchestration library that evolved from a traditional OOP approach to a single adaptive node system. It represents an advancement of PocketFlow's constraint-based philosophy, providing parameter-driven behavior composition for building AI agents, complex workflows, and data processing pipelines.
 
 **Core Philosophy**: Zero boilerplate, parameter-driven behavior composition over inheritance.
 
@@ -130,7 +130,7 @@ result := node.Run(state) // Automatic: batch + parallel + retry
 
 ## Evolution from PocketFlow
 
-| Aspect | PocketFlow | GoFlow Adaptive |
+| Aspect | PocketFlow | Flow Adaptive |
 |--------|------------|-----------------|
 | **Core Size** | 100 lines | ~440 lines |
 | **Node Types** | 1 BaseNode | 1 Adaptive Node |
@@ -149,4 +149,4 @@ Perfect for intelligent agent construction:
 
 - **Go**: Revolutionary adaptive implementation with full parameter-driven composability (`flow/` directory)
 
-GoFlow advances PocketFlow's constraint-based philosophy while maintaining its elegant simplicity through parameter-driven behavior composition.
+Flow advances PocketFlow's constraint-based philosophy while maintaining its elegant simplicity through parameter-driven behavior composition.

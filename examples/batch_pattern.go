@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	goflow "github.com/joemocha/flow/flow"
+	Flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := goflow.NewSharedState()
+	state := Flow.NewSharedState()
 
 	// Automatic batch processing when batch_data is present
-	node := goflow.NewNode()
+	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
 		"batch_data": []int{1, 2, 3, 4, 5},
 	})

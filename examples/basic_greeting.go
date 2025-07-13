@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	goflow "github.com/joemocha/flow/flow"
+	Flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := goflow.NewSharedState()
+	state := Flow.NewSharedState()
 
 	// Create adaptive node with just parameters and business logic
-	node := goflow.NewNode()
+	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
 		"name": "World",
 	})

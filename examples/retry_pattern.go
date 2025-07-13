@@ -5,14 +5,14 @@ import (
 	"math/rand"
 	"time"
 
-	goflow "github.com/joemocha/flow/flow"
+	Flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := goflow.NewSharedState()
+	state := Flow.NewSharedState()
 
 	// Automatic retry behavior when retry_max > 0
-	node := goflow.NewNode()
+	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
 		"retry_max":   3,
 		"retry_delay": time.Millisecond * 100,

@@ -1,4 +1,4 @@
-package goflow
+package Flow
 
 // Flow orchestrates node execution (like PocketFlow's Flow)
 type Flow struct {

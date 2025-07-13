@@ -5,14 +5,14 @@ import (
 	"math/rand"
 	"time"
 
-	goflow "github.com/joemocha/flow/flow"
+	Flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := goflow.NewSharedState()
+	state := Flow.NewSharedState()
 
 	// Composed behavior: batch + parallel + retry in single node!
-	node := goflow.NewNode()
+	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
 		// Batch configuration
 		"batch_data": []string{

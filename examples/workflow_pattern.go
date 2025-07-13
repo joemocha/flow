@@ -3,35 +3,35 @@ package main
 import (
 	"fmt"
 
-	goflow "github.com/joemocha/flow/flow"
+	Flow "github.com/joemocha/flow"
 )
 
 // DataProcessorNode processes input data
 type DataProcessorNode struct {
-	baseNode *goflow.BaseNode
+	baseNode *Flow.BaseNode
 }
 
 func NewDataProcessorNode() *DataProcessorNode {
-	return &DataProcessorNode{baseNode: goflow.NewBaseNode()}
+	return &DataProcessorNode{baseNode: Flow.NewBaseNode()}
 }
 
 func (n *DataProcessorNode) SetParams(params map[string]interface{}) { n.baseNode.SetParams(params) }
 func (n *DataProcessorNode) GetParam(key string) interface{}         { return n.baseNode.GetParam(key) }
-func (n *DataProcessorNode) Next(node goflow.Node, action string) goflow.Node {
+func (n *DataProcessorNode) Next(node Flow.Node, action string) Flow.Node {
 	return n.baseNode.Next(node, action)
 }
-func (n *DataProcessorNode) GetSuccessors() map[string]goflow.Node { return n.baseNode.GetSuccessors() }
-func (n *DataProcessorNode) Prep(shared *goflow.SharedState) interface{} {
+func (n *DataProcessorNode) GetSuccessors() map[string]Flow.Node { return n.baseNode.GetSuccessors() }
+func (n *DataProcessorNode) Prep(shared *Flow.SharedState) interface{} {
 	return n.baseNode.Prep(shared)
 }
-func (n *DataProcessorNode) Post(shared *goflow.SharedState, prepResult interface{}, execResult string) string {
+func (n *DataProcessorNode) Post(shared *Flow.SharedState, prepResult interface{}, execResult string) string {
 	return n.baseNode.Post(shared, prepResult, execResult)
 }
 func (n *DataProcessorNode) Exec(prepResult interface{}) (string, error) {
 	return "processed", nil
 }
 
-func (n *DataProcessorNode) Run(shared *goflow.SharedState) string {
+func (n *DataProcessorNode) Run(shared *Flow.SharedState) string {
 	prepResult := n.Prep(shared)
 
 	// Get input value
@@ -47,28 +47,28 @@ func (n *DataProcessorNode) Run(shared *goflow.SharedState) string {
 
 // ValidatorNode checks if processed data meets criteria
 type ValidatorNode struct {
-	baseNode *goflow.BaseNode
+	baseNode *Flow.BaseNode
 }
 
 func NewValidatorNode() *ValidatorNode {
-	return &ValidatorNode{baseNode: goflow.NewBaseNode()}
+	return &ValidatorNode{baseNode: Flow.NewBaseNode()}
 }
 
 func (n *ValidatorNode) SetParams(params map[string]interface{}) { n.baseNode.SetParams(params) }
 func (n *ValidatorNode) GetParam(key string) interface{}         { return n.baseNode.GetParam(key) }
-func (n *ValidatorNode) Next(node goflow.Node, action string) goflow.Node {
+func (n *ValidatorNode) Next(node Flow.Node, action string) Flow.Node {
 	return n.baseNode.Next(node, action)
 }
-func (n *ValidatorNode) GetSuccessors() map[string]goflow.Node       { return n.baseNode.GetSuccessors() }
-func (n *ValidatorNode) Prep(shared *goflow.SharedState) interface{} { return n.baseNode.Prep(shared) }
-func (n *ValidatorNode) Post(shared *goflow.SharedState, prepResult interface{}, execResult string) string {
+func (n *ValidatorNode) GetSuccessors() map[string]Flow.Node       { return n.baseNode.GetSuccessors() }
+func (n *ValidatorNode) Prep(shared *Flow.SharedState) interface{} { return n.baseNode.Prep(shared) }
+func (n *ValidatorNode) Post(shared *Flow.SharedState, prepResult interface{}, execResult string) string {
 	return n.baseNode.Post(shared, prepResult, execResult)
 }
 func (n *ValidatorNode) Exec(prepResult interface{}) (string, error) {
 	return "validated", nil
 }
 
-func (n *ValidatorNode) Run(shared *goflow.SharedState) string {
+func (n *ValidatorNode) Run(shared *Flow.SharedState) string {
 	prepResult := n.Prep(shared)
 
 	value := shared.GetInt("processed_value")
@@ -84,28 +84,28 @@ func (n *ValidatorNode) Run(shared *goflow.SharedState) string {
 
 // OutputNode handles final output
 type OutputNode struct {
-	baseNode *goflow.BaseNode
+	baseNode *Flow.BaseNode
 }
 
 func NewOutputNode() *OutputNode {
-	return &OutputNode{baseNode: goflow.NewBaseNode()}
+	return &OutputNode{baseNode: Flow.NewBaseNode()}
 }
 
 func (n *OutputNode) SetParams(params map[string]interface{}) { n.baseNode.SetParams(params) }
 func (n *OutputNode) GetParam(key string) interface{}         { return n.baseNode.GetParam(key) }
-func (n *OutputNode) Next(node goflow.Node, action string) goflow.Node {
+func (n *OutputNode) Next(node Flow.Node, action string) Flow.Node {
 	return n.baseNode.Next(node, action)
 }
-func (n *OutputNode) GetSuccessors() map[string]goflow.Node       { return n.baseNode.GetSuccessors() }
-func (n *OutputNode) Prep(shared *goflow.SharedState) interface{} { return n.baseNode.Prep(shared) }
-func (n *OutputNode) Post(shared *goflow.SharedState, prepResult interface{}, execResult string) string {
+func (n *OutputNode) GetSuccessors() map[string]Flow.Node       { return n.baseNode.GetSuccessors() }
+func (n *OutputNode) Prep(shared *Flow.SharedState) interface{} { return n.baseNode.Prep(shared) }
+func (n *OutputNode) Post(shared *Flow.SharedState, prepResult interface{}, execResult string) string {
 	return n.baseNode.Post(shared, prepResult, execResult)
 }
 func (n *OutputNode) Exec(prepResult interface{}) (string, error) {
 	return "output_complete", nil
 }
 
-func (n *OutputNode) Run(shared *goflow.SharedState) string {
+func (n *OutputNode) Run(shared *Flow.SharedState) string {
 	prepResult := n.Prep(shared)
 
 	value := shared.GetInt("processed_value")
@@ -117,7 +117,7 @@ func (n *OutputNode) Run(shared *goflow.SharedState) string {
 }
 
 func main() {
-	state := goflow.NewSharedState()
+	state := Flow.NewSharedState()
 	state.Set("input", 7)
 
 	// Build workflow: Process -> Validate -> Output
@@ -132,7 +132,7 @@ func main() {
 	validator.Next(invalidOutput, "invalid")
 
 	// Create and run flow
-	flow := goflow.NewFlow().Start(processor)
+	flow := Flow.NewFlow().Start(processor)
 	result := flow.Run(state)
 
 	fmt.Printf("Workflow result: %s\n", result)

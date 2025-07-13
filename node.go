@@ -1,4 +1,4 @@
-package goflow
+package Flow
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 type Node struct {
 	params     map[string]interface{}
 	successors map[string]*Node
-	
+
 	// User-provided functions (optional)
 	execFunc func(interface{}) (interface{}, error)
 	prepFunc func(*SharedState) interface{}
@@ -59,7 +59,7 @@ func (n *Node) SetPrepFunc(fn func(*SharedState) interface{}) {
 	n.prepFunc = fn
 }
 
-// SetPostFunc sets optional post-processing function  
+// SetPostFunc sets optional post-processing function
 func (n *Node) SetPostFunc(fn func(*SharedState, interface{}, interface{}) string) {
 	n.postFunc = fn
 }
@@ -70,12 +70,12 @@ func (n *Node) Run(shared *SharedState) string {
 	if batchData := n.GetParam("batch_data"); batchData != nil {
 		return n.runBatch(shared, batchData)
 	}
-	
+
 	// Check for retry behavior
 	if retryMax := n.getIntParam("retry_max"); retryMax > 0 {
 		return n.runWithRetry(shared, retryMax)
 	}
-	
+
 	// Default single execution
 	return n.runSingle(shared)
 }
@@ -87,7 +87,7 @@ func (n *Node) runSingle(shared *SharedState) string {
 	if n.prepFunc != nil {
 		prepResult = n.prepFunc(shared)
 	}
-	
+
 	// Exec phase
 	var execResult interface{} = "default"
 	if n.execFunc != nil {
@@ -97,12 +97,12 @@ func (n *Node) runSingle(shared *SharedState) string {
 		}
 		execResult = result
 	}
-	
+
 	// Post phase
 	if n.postFunc != nil {
 		return n.postFunc(shared, prepResult, execResult)
 	}
-	
+
 	// Convert result to string
 	if str, ok := execResult.(string); ok {
 		return str
@@ -113,13 +113,13 @@ func (n *Node) runSingle(shared *SharedState) string {
 // runWithRetry wraps execution with retry logic when retry_max > 0
 func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 	retryDelay := n.getDurationParam("retry_delay")
-	
+
 	// Prep phase (once)
 	var prepResult interface{}
 	if n.prepFunc != nil {
 		prepResult = n.prepFunc(shared)
 	}
-	
+
 	// Retry loop around exec phase
 	var execResult interface{} = "default"
 	for attempt := 0; attempt < maxRetries; attempt++ {
@@ -129,12 +129,12 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 				execResult = result
 				break
 			}
-			
+
 			// Log retry attempt (could be made configurable)
 			if attempt < maxRetries-1 && retryDelay > 0 {
 				time.Sleep(retryDelay)
 			}
-			
+
 			// Last attempt failed
 			if attempt == maxRetries-1 {
 				panic(err)
@@ -144,12 +144,12 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 			break
 		}
 	}
-	
+
 	// Post phase
 	if n.postFunc != nil {
 		return n.postFunc(shared, prepResult, execResult)
 	}
-	
+
 	// Convert result to string
 	if str, ok := execResult.(string); ok {
 		return str
@@ -163,7 +163,7 @@ func (n *Node) runBatch(shared *SharedState, batchData interface{}) string {
 	if n.getBoolParam("parallel") {
 		return n.runBatchParallel(shared, batchData)
 	}
-	
+
 	// Sequential batch processing
 	return n.runBatchSequential(shared, batchData)
 }
@@ -174,12 +174,12 @@ func (n *Node) runBatchSequential(shared *SharedState, batchData interface{}) st
 	results := make([]interface{}, 0, len(items))
 	retryMax := n.getIntParam("retry_max")
 	retryDelay := n.getDurationParam("retry_delay")
-	
+
 	for _, item := range items {
 		if n.execFunc != nil {
 			var result interface{}
 			var err error
-			
+
 			// Apply retry logic if configured
 			if retryMax > 0 {
 				for attempt := 0; attempt < retryMax; attempt++ {
@@ -194,14 +194,14 @@ func (n *Node) runBatchSequential(shared *SharedState, batchData interface{}) st
 			} else {
 				result, err = n.execFunc(item)
 			}
-			
+
 			if err != nil {
 				panic(err)
 			}
 			results = append(results, result)
 		}
 	}
-	
+
 	// Store results in shared state
 	shared.Set("batch_results", results)
 	return "batch_complete"
@@ -216,22 +216,22 @@ func (n *Node) runBatchParallel(shared *SharedState, batchData interface{}) stri
 	}
 	retryMax := n.getIntParam("retry_max")
 	retryDelay := n.getDurationParam("retry_delay")
-	
+
 	results := make([]interface{}, len(items))
 	sem := make(chan struct{}, parallelLimit)
 	var wg sync.WaitGroup
-	
+
 	for i, item := range items {
 		wg.Add(1)
 		go func(index int, data interface{}) {
 			defer wg.Done()
-			sem <- struct{}{} // Acquire semaphore
+			sem <- struct{}{}        // Acquire semaphore
 			defer func() { <-sem }() // Release semaphore
-			
+
 			if n.execFunc != nil {
 				var result interface{}
 				var err error
-				
+
 				// Apply retry logic if configured
 				if retryMax > 0 {
 					for attempt := 0; attempt < retryMax; attempt++ {
@@ -246,7 +246,7 @@ func (n *Node) runBatchParallel(shared *SharedState, batchData interface{}) stri
 				} else {
 					result, err = n.execFunc(data)
 				}
-				
+
 				if err != nil {
 					panic(err)
 				}
@@ -254,9 +254,9 @@ func (n *Node) runBatchParallel(shared *SharedState, batchData interface{}) stri
 			}
 		}(i, item)
 	}
-	
+
 	wg.Wait()
-	
+
 	// Store results in shared state
 	shared.Set("batch_results", results)
 	return "batch_complete"

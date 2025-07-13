@@ -1,8 +1,8 @@
-# GoFlow
+# Flow
 
 **Revolutionary workflow orchestration library for Go** — An evolutionary Go port of [PocketFlow](https://github.com/The-Pocket/PocketFlow)
 
-GoFlow provides a single adaptive node that automatically changes behavior based on parameters, eliminating boilerplate while enabling unprecedented composability for building AI agents, complex workflows, and data processing pipelines.
+Flow provides a single adaptive node that automatically changes behavior based on parameters, eliminating boilerplate while enabling unprecedented composability for building AI agents, complex workflows, and data processing pipelines.
 
 ## 🚀 Revolutionary Features
 
@@ -30,7 +30,7 @@ package main
 
 import (
     "fmt"
-    "github.com/joemocha/flow/flow"
+    "github.com/joemocha/flow"
 )
 
 func main() {
@@ -235,7 +235,7 @@ state.GetSlice("results")
 | Approach | Lines of Code | Boilerplate | Composability |
 |----------|---------------|-------------|---------------|
 | **Traditional OOP** | 85+ lines/pattern | High (inheritance) | Limited |
-| **GoFlow Adaptive** | ~15 lines/pattern | Zero | Unlimited |
+| **Flow Adaptive** | ~15 lines/pattern | Zero | Unlimited |
 
 ### Benchmark Results
 
@@ -304,7 +304,7 @@ func buildReasoningAgent() *flow.Flow {
 
 ## 🔄 Evolution from PocketFlow
 
-| Aspect | PocketFlow | GoFlow Adaptive |
+| Aspect | PocketFlow | Flow Adaptive |
 |--------|------------|-----------------|
 | **Core Size** | 100 lines | ~440 lines |
 | **Node Types** | 1 BaseNode | 1 Adaptive Node |
@@ -313,7 +313,7 @@ func buildReasoningAgent() *flow.Flow {
 | **Boilerplate** | Minimal | Zero |
 | **Type Safety** | Runtime | Compile-time |
 
-**GoFlow captures PocketFlow's constraint-based philosophy while advancing it with parameter-driven composability.**
+**Flow captures PocketFlow's constraint-based philosophy while advancing it with parameter-driven composability.**
 
 ## 🧪 Testing
 
@@ -364,7 +364,7 @@ MIT License - see LICENSE file for details.
 ## 🔗 Related Projects
 
 - [PocketFlow](https://github.com/The-Pocket/PocketFlow) - Original Python implementation
-- [GoFlow Examples](./examples/) - Working examples of all adaptive patterns
+- [Flow Examples](./examples/) - Working examples of all adaptive patterns
 
 ---
 
