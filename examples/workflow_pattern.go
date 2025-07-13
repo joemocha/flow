@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	goflow "github.com/sam/goflow/flow"
+
+	goflow "github.com/joemocha/flow/flow"
 )
 
 // DataProcessorNode processes input data

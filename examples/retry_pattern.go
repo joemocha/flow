@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
-	goflow "github.com/sam/goflow/flow"
+
+	goflow "github.com/joemocha/flow/flow"
 )
 
 func main() {

@@ -7,7 +7,7 @@ GoFlow provides a single adaptive node that automatically changes behavior based
 ## 🚀 Revolutionary Features
 
 - **🎯 Single Adaptive Node**: One node type that automatically adapts behavior based on parameters
-- **🔄 Parameter-Driven**: Configure behavior through parameters, not inheritance  
+- **🔄 Parameter-Driven**: Configure behavior through parameters, not inheritance
 - **⚡ Auto-Parallel**: Add `parallel: true` to any batch operation for instant concurrency
 - **🔁 Auto-Retry**: Set `retry_max > 0` to automatically enable retry logic
 - **📦 Auto-Batch**: Provide `batch_data` to automatically process collections
@@ -18,7 +18,7 @@ GoFlow provides a single adaptive node that automatically changes behavior based
 ## Installation
 
 ```bash
-go get github.com/sam/goflow
+go get github.com/joemocha/flow
 ```
 
 ## 🎯 The Adaptive Node Revolution
@@ -30,7 +30,7 @@ package main
 
 import (
     "fmt"
-    "github.com/sam/goflow/flow"
+    "github.com/joemocha/flow/flow"
 )
 
 func main() {
@@ -96,7 +96,7 @@ func main() {
 
     result := node.Run(state)
     fmt.Printf("Batch result: %s\n", result)
-    
+
     // Results automatically stored in shared state
     results := state.Get("batch_results")
     fmt.Printf("Processed items: %v\n", results)
@@ -117,7 +117,7 @@ func main() {
         // Batch configuration
         "batch_data": []string{
             "https://api1.example.com",
-            "https://api2.example.com", 
+            "https://api2.example.com",
             "https://api3.example.com",
             "https://api4.example.com",
             "https://api5.example.com",
@@ -125,11 +125,11 @@ func main() {
         // Parallel configuration
         "parallel":       true,
         "parallel_limit": 2, // Max 2 concurrent requests
-        // Retry configuration  
+        // Retry configuration
         "retry_max":   3,
         "retry_delay": time.Millisecond * 200,
     })
-    
+
     node.SetExecFunc(func(item interface{}) (interface{}, error) {
         // Pure business logic - all patterns applied automatically!
         url := item.(string)
@@ -137,7 +137,7 @@ func main() {
     })
 
     result := node.Run(state)
-    
+
     fmt.Println("Behaviors applied automatically:")
     fmt.Println("✓ Batch processing (5 URLs)")
     fmt.Println("✓ Parallel execution (max 2 concurrent)")
@@ -151,14 +151,14 @@ func main() {
 ```go
 func main() {
     state := flow.NewSharedState()
-    
+
     // Create adaptive nodes
     step1 := flow.NewNode()
     step1.SetExecFunc(func(prep interface{}) (interface{}, error) {
         // Processing step
         return "continue", nil
     })
-    
+
     step2 := flow.NewNode()
     step2.SetParams(map[string]interface{}{
         "batch_data": []int{1, 2, 3, 4, 5},
@@ -167,20 +167,20 @@ func main() {
     step2.SetExecFunc(func(item interface{}) (interface{}, error) {
         return item.(int) * item.(int), nil  // Square numbers in parallel
     })
-    
+
     step3 := flow.NewNode()
     step3.SetExecFunc(func(prep interface{}) (interface{}, error) {
         return "done", nil
     })
-    
+
     // Chain nodes with specific actions
     step1.Next(step2, "continue")
     step2.Next(step3, "batch_complete")
-    
+
     // Create and run flow
     flow := flow.NewFlow().Start(step1)
     result := flow.Run(state)
-    
+
     fmt.Printf("Flow result: %s\n", result)
 }
 ```
@@ -241,7 +241,7 @@ state.GetSlice("results")
 
 ```
 BenchmarkAdaptiveNodeBasic-48      197M ops   6.2 ns/op    0 allocs
-BenchmarkAdaptiveBatchSequential-48 995K ops  1085 ns/op   3 allocs  
+BenchmarkAdaptiveBatchSequential-48 995K ops  1085 ns/op   3 allocs
 BenchmarkAdaptiveBatchParallel-48   17K ops   65μs/op      205 allocs
 ```
 
@@ -262,7 +262,7 @@ go test ./flow/... -bench=. -benchmem
 
 **Test Coverage:**
 - ✅ Basic adaptive behavior
-- ✅ Retry pattern detection and execution  
+- ✅ Retry pattern detection and execution
 - ✅ Batch processing (sequential and parallel)
 - ✅ Composed patterns (retry + batch + parallel)
 - ✅ Flow integration with adaptive nodes
@@ -281,7 +281,7 @@ func buildReasoningAgent() *flow.Flow {
         "retry_max": 2,
     })
     inputNode.SetExecFunc(parseUserInput)
-    
+
     // Parallel tool execution
     toolNode := flow.NewNode()
     toolNode.SetParams(map[string]interface{}{
@@ -290,14 +290,14 @@ func buildReasoningAgent() *flow.Flow {
         "retry_max": 3,
     })
     toolNode.SetExecFunc(executeTool)
-    
+
     // Response generation
     responseNode := flow.NewNode()
     responseNode.SetExecFunc(generateResponse)
-    
+
     inputNode.Next(toolNode, "needs_tools")
     toolNode.Next(responseNode, "batch_complete")
-    
+
     return flow.NewFlow().Start(inputNode)
 }
 ```

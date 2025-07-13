@@ -1,4 +1,4 @@
-module github.com/sam/goflow
+module github.com/joemocha/flow
 
 go 1.21
 
