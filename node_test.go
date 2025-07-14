@@ -108,7 +108,8 @@ func TestAdaptiveBatchBehavior(t *testing.T) {
 
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data": []int{1, 2, 3, 4, 5},
+		"data":  []int{1, 2, 3, 4, 5},
+		"batch": true,
 	})
 
 	node.SetExecFunc(func(item interface{}) (interface{}, error) {
@@ -141,7 +142,8 @@ func TestAdaptiveParallelBehavior(t *testing.T) {
 
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data":     []string{"item1", "item2", "item3", "item4"},
+		"data":           []string{"item1", "item2", "item3", "item4"},
+		"batch":          true,
 		"parallel":       true,
 		"parallel_limit": 2,
 	})
@@ -209,7 +211,8 @@ func TestComposedRetryBatch(t *testing.T) {
 
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data":  []string{"item1", "item2", "item3"},
+		"data":        []string{"item1", "item2", "item3"},
+		"batch":       true,
 		"retry_max":   2,
 		"retry_delay": time.Millisecond * 5,
 	})
@@ -246,7 +249,8 @@ func TestComposedBatchParallel(t *testing.T) {
 
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data":     []int{1, 2, 3, 4, 5, 6},
+		"data":           []int{1, 2, 3, 4, 5, 6},
+		"batch":          true,
 		"parallel":       true,
 		"parallel_limit": 3,
 	})
@@ -291,7 +295,8 @@ func TestComposedAll(t *testing.T) {
 
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data":     []string{"url1", "url2", "url3"},
+		"data":           []string{"url1", "url2", "url3"},
+		"batch":          true,
 		"parallel":       true,
 		"parallel_limit": 2,
 		"retry_max":      3,
@@ -341,11 +346,12 @@ func TestComposedAll(t *testing.T) {
 func TestParameterPrecedence(t *testing.T) {
 	state := NewSharedState()
 
-	// Test that batch_data takes precedence over retry_max
+	// Test that batch: true takes precedence over retry_max
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data": []string{"item1", "item2"},
-		"retry_max":  3, // Should be ignored in favor of batch
+		"data":      []string{"item1", "item2"},
+		"batch":     true,
+		"retry_max": 3, // Should be ignored in favor of batch
 	})
 
 	execCount := 0
@@ -409,7 +415,8 @@ func TestEdgeCases(t *testing.T) {
 		state := NewSharedState()
 		node := NewNode()
 		node.SetParams(map[string]interface{}{
-			"batch_data": []int{},
+			"data":  []int{},
+			"batch": true,
 		})
 
 		execCount := 0
@@ -449,7 +456,8 @@ func TestEdgeCases(t *testing.T) {
 		state := NewSharedState()
 		node := NewNode()
 		node.SetParams(map[string]interface{}{
-			"batch_data":     []int{1, 2, 3},
+			"data":           []int{1, 2, 3},
+			"batch":          true,
 			"parallel":       true,
 			"parallel_limit": 0, // Should default to len(items)
 		})
@@ -495,7 +503,8 @@ func BenchmarkAdaptiveBatchSequential(b *testing.B) {
 	}
 
 	node.SetParams(map[string]interface{}{
-		"batch_data": items,
+		"data":  items,
+		"batch": true,
 	})
 	node.SetExecFunc(func(item interface{}) (interface{}, error) {
 		return item.(int) * 2, nil
@@ -517,7 +526,8 @@ func BenchmarkAdaptiveBatchParallel(b *testing.B) {
 	}
 
 	node.SetParams(map[string]interface{}{
-		"batch_data":     items,
+		"data":           items,
+		"batch":          true,
 		"parallel":       true,
 		"parallel_limit": 10,
 	})

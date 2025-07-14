@@ -9,10 +9,11 @@ import (
 func main() {
 	state := Flow.NewSharedState()
 
-	// Automatic batch processing when batch_data is present
+	// Automatic batch processing when batch: true is set
 	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
-		"batch_data": []int{1, 2, 3, 4, 5},
+		"data":  []int{1, 2, 3, 4, 5},
+		"batch": true,
 	})
 	node.SetExecFunc(func(item interface{}) (interface{}, error) {
 		// Called once per item automatically!

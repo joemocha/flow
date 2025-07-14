@@ -10,7 +10,7 @@ Flow provides a single adaptive node that automatically changes behavior based o
 - **🔄 Parameter-Driven**: Configure behavior through parameters, not inheritance
 - **⚡ Auto-Parallel**: Add `parallel: true` to any batch operation for instant concurrency
 - **🔁 Auto-Retry**: Set `retry_max > 0` to automatically enable retry logic
-- **📦 Auto-Batch**: Provide `batch_data` to automatically process collections
+- **📦 Auto-Batch**: Set `batch: true` with `data` to automatically process collections
 - **🧩 Composable**: Mix retry + batch + parallel in a single node declaration
 - **🪶 Ultra-Lightweight**: ~440 lines total vs 748 lines of traditional approaches
 - **🧵 Thread-Safe**: SharedState management for safe concurrent data sharing
@@ -83,10 +83,11 @@ func main() {
 func main() {
     state := flow.NewSharedState()
 
-    // Automatic batch processing when batch_data is present
+    // Automatic batch processing when batch: true is set
     node := flow.NewNode()
     node.SetParams(map[string]interface{}{
-        "batch_data": []int{1, 2, 3, 4, 5},
+        "data":  []int{1, 2, 3, 4, 5},
+        "batch": true,
     })
     node.SetExecFunc(func(item interface{}) (interface{}, error) {
         // Called once per item automatically!
@@ -115,13 +116,14 @@ func main() {
     node := flow.NewNode()
     node.SetParams(map[string]interface{}{
         // Batch configuration
-        "batch_data": []string{
+        "data": []string{
             "https://api1.example.com",
             "https://api2.example.com",
             "https://api3.example.com",
             "https://api4.example.com",
             "https://api5.example.com",
         },
+        "batch": true,
         // Parallel configuration
         "parallel":       true,
         "parallel_limit": 2, // Max 2 concurrent requests
@@ -161,7 +163,8 @@ func main() {
 
     step2 := flow.NewNode()
     step2.SetParams(map[string]interface{}{
-        "batch_data": []int{1, 2, 3, 4, 5},
+        "data": []int{1, 2, 3, 4, 5},
+        "batch": true,
         "parallel": true,
     })
     step2.SetExecFunc(func(item interface{}) (interface{}, error) {
@@ -191,13 +194,14 @@ func main() {
 |-----------|------|--------|---------|
 | `retry_max` | `int` | Auto-enables retry logic | `"retry_max": 3` |
 | `retry_delay` | `time.Duration` | Delay between retries | `"retry_delay": time.Second` |
-| `batch_data` | `[]interface{}` | Auto-enables batch processing | `"batch_data": []int{1,2,3}` |
+| `data` | `[]interface{}` | Data to process (used with batch) | `"data": []int{1,2,3}` |
+| `batch` | `bool` | Enables batch processing of data | `"batch": true` |
 | `parallel` | `bool` | Enables parallel batch execution | `"parallel": true` |
 | `parallel_limit` | `int` | Max concurrent goroutines | `"parallel_limit": 5` |
 
 ### Parameter Detection Priority
 
-1. **Batch Processing**: `batch_data` present → process each item
+1. **Batch Processing**: `batch: true` → process each item in `data`
 2. **Retry Logic**: `retry_max > 0` → wrap execution with retry
 3. **Single Execution**: Default behavior
 
@@ -285,7 +289,8 @@ func buildReasoningAgent() *flow.Flow {
     // Parallel tool execution
     toolNode := flow.NewNode()
     toolNode.SetParams(map[string]interface{}{
-        "batch_data": []string{"search", "calculator", "weather"},
+        "data": []string{"search", "calculator", "weather"},
+        "batch": true,
         "parallel": true,
         "retry_max": 3,
     })

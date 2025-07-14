@@ -32,7 +32,7 @@ type Node struct {
 
 The single Node automatically detects and applies patterns based on parameters:
 
-1. **Batch Processing**: `batch_data` present → process each item sequentially
+1. **Batch Processing**: `batch: true` → process each item in `data` sequentially
 2. **Parallel Execution**: `parallel: true` → concurrent goroutine execution with semaphore limits
 3. **Retry Logic**: `retry_max > 0` → automatic retry with exponential backoff
 4. **Composability**: All patterns can be combined in a single node declaration
@@ -41,7 +41,8 @@ The single Node automatically detects and applies patterns based on parameters:
 
 | Parameter | Type | Effect | Composition |
 |-----------|------|--------|-------------|
-| `batch_data` | `[]interface{}` | Auto-batch processing | ✓ Combines with retry + parallel |
+| `data` | `[]interface{}` | Data to process | ✓ Used with batch flag |
+| `batch` | `bool` | Auto-batch processing | ✓ Combines with retry + parallel |
 | `retry_max` | `int` | Auto-retry logic | ✓ Combines with batch + parallel |
 | `retry_delay` | `time.Duration` | Retry delay timing | ✓ Works with retry_max |
 | `parallel` | `bool` | Parallel batch execution | ✓ Combines with batch + retry |
@@ -92,7 +93,8 @@ result := node.Run(state) // Returns: "Hello, World!"
 ```go
 node := NewNode()
 node.SetParams(map[string]interface{}{
-    "batch_data":     []string{"url1", "url2", "url3"},
+    "data":           []string{"url1", "url2", "url3"},
+    "batch":          true,
     "parallel":       true,
     "parallel_limit": 2,
     "retry_max":      3,

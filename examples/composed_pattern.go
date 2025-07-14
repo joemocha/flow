@@ -15,13 +15,14 @@ func main() {
 	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
 		// Batch configuration
-		"batch_data": []string{
+		"data": []string{
 			"https://api1.example.com",
 			"https://api2.example.com",
 			"https://api3.example.com",
 			"https://api4.example.com",
 			"https://api5.example.com",
 		},
+		"batch": true,
 		// Parallel configuration
 		"parallel":       true,
 		"parallel_limit": 2, // Max 2 concurrent requests

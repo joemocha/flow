@@ -67,8 +67,11 @@ func (n *Node) SetPostFunc(fn func(*SharedState, interface{}, interface{}) strin
 // Run executes the node with adaptive behavior based on parameters
 func (n *Node) Run(shared *SharedState) string {
 	// Check for batch processing first
-	if batchData := n.GetParam("batch_data"); batchData != nil {
-		return n.runBatch(shared, batchData)
+	if n.getBoolParam("batch") {
+		if data := n.GetParam("data"); data != nil {
+			return n.runBatch(shared, data)
+		}
+		// If batch: true but no data, fall through to single execution
 	}
 
 	// Check for retry behavior
@@ -157,20 +160,20 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 	return fmt.Sprintf("%v", execResult)
 }
 
-// runBatch processes batch_data by calling exec once per item
-func (n *Node) runBatch(shared *SharedState, batchData interface{}) string {
+// runBatch processes data by calling exec once per item
+func (n *Node) runBatch(shared *SharedState, data interface{}) string {
 	// Check for parallel processing
 	if n.getBoolParam("parallel") {
-		return n.runBatchParallel(shared, batchData)
+		return n.runBatchParallel(shared, data)
 	}
 
 	// Sequential batch processing
-	return n.runBatchSequential(shared, batchData)
+	return n.runBatchSequential(shared, data)
 }
 
 // runBatchSequential processes items one by one
-func (n *Node) runBatchSequential(shared *SharedState, batchData interface{}) string {
-	items := n.convertToSlice(batchData)
+func (n *Node) runBatchSequential(shared *SharedState, data interface{}) string {
+	items := n.convertToSlice(data)
 	results := make([]interface{}, 0, len(items))
 	retryMax := n.getIntParam("retry_max")
 	retryDelay := n.getDurationParam("retry_delay")
@@ -208,8 +211,8 @@ func (n *Node) runBatchSequential(shared *SharedState, batchData interface{}) st
 }
 
 // runBatchParallel processes items concurrently
-func (n *Node) runBatchParallel(shared *SharedState, batchData interface{}) string {
-	items := n.convertToSlice(batchData)
+func (n *Node) runBatchParallel(shared *SharedState, data interface{}) string {
+	items := n.convertToSlice(data)
 	parallelLimit := n.getIntParam("parallel_limit")
 	if parallelLimit <= 0 {
 		parallelLimit = len(items) // No limit
