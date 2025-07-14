@@ -11,10 +11,10 @@ import (
 func main() {
 	state := Flow.NewSharedState()
 
-	// Automatic retry behavior when retry_max > 0
+	// Automatic retry behavior when retries > 0
 	node := Flow.NewNode()
 	node.SetParams(map[string]interface{}{
-		"retry_max":   3,
+		"retries":     3,
 		"retry_delay": time.Millisecond * 100,
 	})
 	node.SetExecFunc(func(prep interface{}) (interface{}, error) {

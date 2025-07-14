@@ -34,7 +34,7 @@ The single Node automatically detects and applies patterns based on parameters:
 
 1. **Batch Processing**: `batch: true` → process each item in `data` sequentially
 2. **Parallel Execution**: `parallel: true` → concurrent goroutine execution with semaphore limits
-3. **Retry Logic**: `retry_max > 0` → automatic retry with exponential backoff
+3. **Retry Logic**: `retries > 0` → automatic retry with exponential backoff and jitter
 4. **Composability**: All patterns can be combined in a single node declaration
 
 ### Parameter-Driven Behaviors
@@ -43,8 +43,8 @@ The single Node automatically detects and applies patterns based on parameters:
 |-----------|------|--------|-------------|
 | `data` | `[]interface{}` | Data to process | ✓ Used with batch flag |
 | `batch` | `bool` | Auto-batch processing | ✓ Combines with retry + parallel |
-| `retry_max` | `int` | Auto-retry logic | ✓ Combines with batch + parallel |
-| `retry_delay` | `time.Duration` | Retry delay timing | ✓ Works with retry_max |
+| `retries` | `int` | Auto-retry logic with exponential backoff | ✓ Combines with batch + parallel |
+| `retry_delay` | `time.Duration` | Base delay for exponential backoff | ✓ Works with retries |
 | `parallel` | `bool` | Parallel batch execution | ✓ Combines with batch + retry |
 | `parallel_limit` | `int` | Goroutine concurrency limit | ✓ Works with parallel |
 
@@ -97,7 +97,7 @@ node.SetParams(map[string]interface{}{
     "batch":          true,
     "parallel":       true,
     "parallel_limit": 2,
-    "retry_max":      3,
+    "retries":        3,
     "retry_delay":    time.Millisecond * 200,
 })
 node.SetExecFunc(func(item interface{}) (interface{}, error) {

@@ -54,7 +54,7 @@ func TestAdaptiveRetryBehavior(t *testing.T) {
 	// Node with retry configuration
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"retry_max":   3,
+		"retries":     3,
 		"retry_delay": time.Millisecond * 10, // Fast for testing
 	})
 
@@ -83,7 +83,7 @@ func TestAdaptiveRetryFailure(t *testing.T) {
 
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"retry_max":   2,
+		"retries":     2,
 		"retry_delay": time.Millisecond * 5,
 	})
 
@@ -213,7 +213,7 @@ func TestComposedRetryBatch(t *testing.T) {
 	node.SetParams(map[string]interface{}{
 		"data":        []string{"item1", "item2", "item3"},
 		"batch":       true,
-		"retry_max":   2,
+		"retries":     2,
 		"retry_delay": time.Millisecond * 5,
 	})
 
@@ -299,7 +299,7 @@ func TestComposedAll(t *testing.T) {
 		"batch":          true,
 		"parallel":       true,
 		"parallel_limit": 2,
-		"retry_max":      3,
+		"retries":        3,
 		"retry_delay":    time.Millisecond * 10,
 	})
 
@@ -346,12 +346,12 @@ func TestComposedAll(t *testing.T) {
 func TestParameterPrecedence(t *testing.T) {
 	state := NewSharedState()
 
-	// Test that batch: true takes precedence over retry_max
+	// Test that batch: true takes precedence over retries
 	node := NewNode()
 	node.SetParams(map[string]interface{}{
-		"data":      []string{"item1", "item2"},
-		"batch":     true,
-		"retry_max": 3, // Should be ignored in favor of batch
+		"data":    []string{"item1", "item2"},
+		"batch":   true,
+		"retries": 3, // Should be ignored in favor of batch
 	})
 
 	execCount := 0

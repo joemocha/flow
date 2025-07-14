@@ -9,7 +9,7 @@ Flow provides a single adaptive node that automatically changes behavior based o
 - **🎯 Single Adaptive Node**: One node type that automatically adapts behavior based on parameters
 - **🔄 Parameter-Driven**: Configure behavior through parameters, not inheritance
 - **⚡ Auto-Parallel**: Add `parallel: true` to any batch operation for instant concurrency
-- **🔁 Auto-Retry**: Set `retry_max > 0` to automatically enable retry logic
+- **🔁 Auto-Retry**: Set `retries > 0` to automatically enable retry logic with exponential backoff
 - **📦 Auto-Batch**: Set `batch: true` with `data` to automatically process collections
 - **🧩 Composable**: Mix retry + batch + parallel in a single node declaration
 - **🪶 Ultra-Lightweight**: ~440 lines total vs 748 lines of traditional approaches
@@ -58,10 +58,10 @@ func main() {
 func main() {
     state := flow.NewSharedState()
 
-    // Automatic retry when retry_max > 0 - no custom RetryNode needed!
+    // Automatic retry when retries > 0 - no custom RetryNode needed!
     node := flow.NewNode()
     node.SetParams(map[string]interface{}{
-        "retry_max":   3,
+        "retries":     3,
         "retry_delay": time.Millisecond * 100,
     })
     node.SetExecFunc(func(prep interface{}) (interface{}, error) {
@@ -128,7 +128,7 @@ func main() {
         "parallel":       true,
         "parallel_limit": 2, // Max 2 concurrent requests
         // Retry configuration
-        "retry_max":   3,
+        "retries":     3,
         "retry_delay": time.Millisecond * 200,
     })
 
@@ -192,8 +192,8 @@ func main() {
 
 | Parameter | Type | Effect | Example |
 |-----------|------|--------|---------|
-| `retry_max` | `int` | Auto-enables retry logic | `"retry_max": 3` |
-| `retry_delay` | `time.Duration` | Delay between retries | `"retry_delay": time.Second` |
+| `retries` | `int` | Auto-enables retry logic with exponential backoff | `"retries": 3` |
+| `retry_delay` | `time.Duration` | Base delay for exponential backoff calculation | `"retry_delay": time.Second` |
 | `data` | `[]interface{}` | Data to process (used with batch) | `"data": []int{1,2,3}` |
 | `batch` | `bool` | Enables batch processing of data | `"batch": true` |
 | `parallel` | `bool` | Enables parallel batch execution | `"parallel": true` |
@@ -202,7 +202,7 @@ func main() {
 ### Parameter Detection Priority
 
 1. **Batch Processing**: `batch: true` → process each item in `data`
-2. **Retry Logic**: `retry_max > 0` → wrap execution with retry
+2. **Retry Logic**: `retries > 0` → wrap execution with exponential backoff retry
 3. **Single Execution**: Default behavior
 
 **Composability**: Batch + Retry + Parallel can all be combined!
@@ -282,7 +282,7 @@ func buildReasoningAgent() *flow.Flow {
     // Input processing with retry
     inputNode := flow.NewNode()
     inputNode.SetParams(map[string]interface{}{
-        "retry_max": 2,
+        "retries": 2,
     })
     inputNode.SetExecFunc(parseUserInput)
 
@@ -292,7 +292,7 @@ func buildReasoningAgent() *flow.Flow {
         "data": []string{"search", "calculator", "weather"},
         "batch": true,
         "parallel": true,
-        "retry_max": 3,
+        "retries": 3,
     })
     toolNode.SetExecFunc(executeTool)
 

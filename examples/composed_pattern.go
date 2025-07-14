@@ -27,7 +27,7 @@ func main() {
 		"parallel":       true,
 		"parallel_limit": 2, // Max 2 concurrent requests
 		// Retry configuration
-		"retry_max":   3,
+		"retries":     3,
 		"retry_delay": time.Millisecond * 200,
 	})
 

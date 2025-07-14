@@ -2,6 +2,8 @@ package Flow
 
 import (
 	"fmt"
+	"math"
+	"math/rand"
 	"sync"
 	"time"
 )
@@ -75,8 +77,8 @@ func (n *Node) Run(shared *SharedState) string {
 	}
 
 	// Check for retry behavior
-	if retryMax := n.getIntParam("retry_max"); retryMax > 0 {
-		return n.runWithRetry(shared, retryMax)
+	if retries := n.getIntParam("retries"); retries > 0 {
+		return n.runWithRetry(shared, retries)
 	}
 
 	// Default single execution
@@ -113,7 +115,7 @@ func (n *Node) runSingle(shared *SharedState) string {
 	return fmt.Sprintf("%v", execResult)
 }
 
-// runWithRetry wraps execution with retry logic when retry_max > 0
+// runWithRetry wraps execution with retry logic when retries > 0
 func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 	retryDelay := n.getDurationParam("retry_delay")
 
@@ -133,9 +135,14 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 				break
 			}
 
-			// Log retry attempt (could be made configurable)
+			// Calculate exponential backoff with jitter for next attempt
 			if attempt < maxRetries-1 && retryDelay > 0 {
-				time.Sleep(retryDelay)
+				// Exponential backoff: retry_delay * (2^attempt) + jitter
+				backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
+				// Add jitter (up to 10% of the backoff delay)
+				jitter := time.Duration(rand.Float64() * float64(backoffDelay) * 0.1)
+				totalDelay := backoffDelay + jitter
+				time.Sleep(totalDelay)
 			}
 
 			// Last attempt failed
@@ -175,7 +182,7 @@ func (n *Node) runBatch(shared *SharedState, data interface{}) string {
 func (n *Node) runBatchSequential(shared *SharedState, data interface{}) string {
 	items := n.convertToSlice(data)
 	results := make([]interface{}, 0, len(items))
-	retryMax := n.getIntParam("retry_max")
+	retries := n.getIntParam("retries")
 	retryDelay := n.getDurationParam("retry_delay")
 
 	for _, item := range items {
@@ -184,14 +191,19 @@ func (n *Node) runBatchSequential(shared *SharedState, data interface{}) string 
 			var err error
 
 			// Apply retry logic if configured
-			if retryMax > 0 {
-				for attempt := 0; attempt < retryMax; attempt++ {
+			if retries > 0 {
+				for attempt := 0; attempt < retries; attempt++ {
 					result, err = n.execFunc(item)
 					if err == nil {
 						break
 					}
-					if attempt < retryMax-1 && retryDelay > 0 {
-						time.Sleep(retryDelay)
+					if attempt < retries-1 && retryDelay > 0 {
+						// Exponential backoff: retry_delay * (2^attempt) + jitter
+						backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
+						// Add jitter (up to 10% of the backoff delay)
+						jitter := time.Duration(rand.Float64() * float64(backoffDelay) * 0.1)
+						totalDelay := backoffDelay + jitter
+						time.Sleep(totalDelay)
 					}
 				}
 			} else {
@@ -217,7 +229,7 @@ func (n *Node) runBatchParallel(shared *SharedState, data interface{}) string {
 	if parallelLimit <= 0 {
 		parallelLimit = len(items) // No limit
 	}
-	retryMax := n.getIntParam("retry_max")
+	retries := n.getIntParam("retries")
 	retryDelay := n.getDurationParam("retry_delay")
 
 	results := make([]interface{}, len(items))
@@ -236,14 +248,19 @@ func (n *Node) runBatchParallel(shared *SharedState, data interface{}) string {
 				var err error
 
 				// Apply retry logic if configured
-				if retryMax > 0 {
-					for attempt := 0; attempt < retryMax; attempt++ {
+				if retries > 0 {
+					for attempt := 0; attempt < retries; attempt++ {
 						result, err = n.execFunc(data)
 						if err == nil {
 							break
 						}
-						if attempt < retryMax-1 && retryDelay > 0 {
-							time.Sleep(retryDelay)
+						if attempt < retries-1 && retryDelay > 0 {
+							// Exponential backoff: retry_delay * (2^attempt) + jitter
+							backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
+							// Add jitter (up to 10% of the backoff delay)
+							jitter := time.Duration(rand.Float64() * float64(backoffDelay) * 0.1)
+							totalDelay := backoffDelay + jitter
+							time.Sleep(totalDelay)
 						}
 					}
 				} else {
