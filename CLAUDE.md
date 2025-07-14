@@ -4,15 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Flow is a revolutionary workflow orchestration library that evolved from a traditional OOP approach to a single adaptive node system. It represents an advancement of PocketFlow's constraint-based philosophy, providing parameter-driven behavior composition for building AI agents, complex workflows, and data processing pipelines.
+Flow is a workflow orchestration library that uses a single adaptive node system instead of traditional OOP inheritance patterns. It builds on PocketFlow's constraint-based philosophy, providing parameter-driven behavior composition for building AI agents, workflows, and data processing pipelines.
 
 **Core Philosophy**: Zero boilerplate, parameter-driven behavior composition over inheritance.
 
-## Revolutionary Architecture
+## Architecture
 
 ### Single Adaptive Node System
 
-**Node** (`flow/node.go:9-313`): The revolutionary single node type that automatically adapts behavior based on parameters. Eliminates the need for multiple node types through intelligent parameter detection.
+**Node** (`flow/node.go:9-313`): A single node type that adapts behavior based on parameters. Reduces the need for multiple node types through parameter detection.
 
 ```go
 type Node struct {
@@ -24,7 +24,7 @@ type Node struct {
 }
 ```
 
-**Flow** (`flow/flow.go:3-67`): Simplified orchestrator that works with the unified Node type. Handles sequential traversal and action-based routing.
+**Flow** (`flow/flow.go:3-67`): Orchestrator that works with the unified Node type. Handles sequential traversal and action-based routing.
 
 **SharedState** (`flow/shared_state.go:8-59`): Thread-safe state container for data sharing between nodes with typed getters and collection operations.
 
@@ -140,7 +140,7 @@ result := node.Run(state) // Automatic: batch + parallel + retry
 
 ## Usage Patterns for AI Agents
 
-Perfect for intelligent agent construction:
+Suitable for intelligent agent construction:
 - **Input Processing**: Retry-enabled parsing with fallback
 - **Tool Execution**: Parallel batch processing with retry
 - **Response Generation**: Flow chains with adaptive nodes
