@@ -28,6 +28,11 @@
 //	result := node.Run(state)
 package Flow
 
+const (
+	// DefaultAction represents the default action when no specific action is provided
+	DefaultAction = "default"
+)
+
 // Flow orchestrates the execution of connected nodes in a workflow.
 // It provides sequential traversal and action-based routing between nodes.
 //
@@ -97,7 +102,7 @@ func (f *Flow) Run(shared *SharedState) string {
 // getNextNode gets the next node based on action (like PocketFlow's get_next_node)
 func (f *Flow) getNextNode(curr *Node, action string) *Node {
 	if action == "" {
-		action = "default"
+		action = DefaultAction
 	}
 
 	successors := curr.GetSuccessors()
@@ -106,8 +111,8 @@ func (f *Flow) getNextNode(curr *Node, action string) *Node {
 	}
 
 	// Try default if specific action not found
-	if action != "default" {
-		if defaultNext, exists := successors["default"]; exists {
+	if action != DefaultAction {
+		if defaultNext, exists := successors[DefaultAction]; exists {
 			return defaultNext
 		}
 	}

@@ -1,12 +1,30 @@
 package Flow
 
 import (
+	"crypto/rand"
 	"fmt"
 	"math"
-	"math/rand"
+	"math/big"
 	"sync"
 	"time"
 )
+
+const (
+	// BatchCompleteAction represents the action returned when batch processing is complete
+	BatchCompleteAction = "batch_complete"
+)
+
+// secureRandFloat64 generates a cryptographically secure random float64 between 0 and 1
+func secureRandFloat64() float64 {
+	// Generate a random number between 0 and 2^53-1 (max safe integer for float64)
+	maxVal := big.NewInt(1 << 53)
+	n, err := rand.Int(rand.Reader, maxVal)
+	if err != nil {
+		// Fallback to time-based seed if crypto/rand fails
+		return 0.05 // Fixed small jitter as fallback
+	}
+	return float64(n.Int64()) / float64(maxVal.Int64())
+}
 
 // Node is the core adaptive node that automatically changes behavior based on parameters.
 // This single node type eliminates the need for multiple specialized node types by
@@ -107,7 +125,7 @@ func (n *Node) GetParam(key string) interface{} {
 //	validator.Next(failure, "invalid")
 func (n *Node) Next(node *Node, action string) *Node {
 	if action == "" {
-		action = "default"
+		action = DefaultAction
 	}
 	n.successors[action] = node
 	return node
@@ -162,7 +180,7 @@ func (n *Node) runSingle(shared *SharedState) string {
 	}
 
 	// Exec phase
-	var execResult interface{} = "default"
+	var execResult interface{} = DefaultAction
 	if n.execFunc != nil {
 		result, err := n.execFunc(prepResult)
 		if err != nil {
@@ -194,7 +212,7 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 	}
 
 	// Retry loop around exec phase
-	var execResult interface{} = "default"
+	var execResult interface{} = DefaultAction
 	for attempt := 0; attempt < maxRetries; attempt++ {
 		if n.execFunc != nil {
 			result, err := n.execFunc(prepResult)
@@ -208,7 +226,7 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 				// Exponential backoff: retry_delay * (2^attempt) + jitter
 				backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
 				// Add jitter (up to 10% of the backoff delay)
-				jitter := time.Duration(rand.Float64() * float64(backoffDelay) * 0.1)
+				jitter := time.Duration(secureRandFloat64() * float64(backoffDelay) * 0.1)
 				totalDelay := backoffDelay + jitter
 				time.Sleep(totalDelay)
 			}
@@ -218,7 +236,7 @@ func (n *Node) runWithRetry(shared *SharedState, maxRetries int) string {
 				panic(err)
 			}
 		} else {
-			execResult = "default"
+			execResult = DefaultAction
 			break
 		}
 	}
@@ -254,40 +272,42 @@ func (n *Node) runBatchSequential(shared *SharedState, data interface{}) string 
 	retryDelay := n.getDurationParam("retry_delay")
 
 	for _, item := range items {
-		if n.execFunc != nil {
-			var result interface{}
-			var err error
-
-			// Apply retry logic if configured
-			if retries > 0 {
-				for attempt := 0; attempt < retries; attempt++ {
-					result, err = n.execFunc(item)
-					if err == nil {
-						break
-					}
-					if attempt < retries-1 && retryDelay > 0 {
-						// Exponential backoff: retry_delay * (2^attempt) + jitter
-						backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
-						// Add jitter (up to 10% of the backoff delay)
-						jitter := time.Duration(rand.Float64() * float64(backoffDelay) * 0.1)
-						totalDelay := backoffDelay + jitter
-						time.Sleep(totalDelay)
-					}
-				}
-			} else {
-				result, err = n.execFunc(item)
-			}
-
-			if err != nil {
-				panic(err)
-			}
-			results = append(results, result)
+		if n.execFunc == nil {
+			continue
 		}
+
+		var result interface{}
+		var err error
+
+		// Apply retry logic if configured
+		if retries > 0 {
+			for attempt := 0; attempt < retries; attempt++ {
+				result, err = n.execFunc(item)
+				if err == nil {
+					break
+				}
+				if attempt < retries-1 && retryDelay > 0 {
+					// Exponential backoff: retry_delay * (2^attempt) + jitter
+					backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
+					// Add jitter (up to 10% of the backoff delay)
+					jitter := time.Duration(secureRandFloat64() * float64(backoffDelay) * 0.1)
+					totalDelay := backoffDelay + jitter
+					time.Sleep(totalDelay)
+				}
+			}
+		} else {
+			result, err = n.execFunc(item)
+		}
+
+		if err != nil {
+			panic(err)
+		}
+		results = append(results, result)
 	}
 
 	// Store results in shared state
 	shared.Set("batch_results", results)
-	return "batch_complete"
+	return BatchCompleteAction
 }
 
 // runBatchParallel processes items concurrently
@@ -326,7 +346,7 @@ func (n *Node) runBatchParallel(shared *SharedState, data interface{}) string {
 							// Exponential backoff: retry_delay * (2^attempt) + jitter
 							backoffDelay := time.Duration(float64(retryDelay) * math.Pow(2, float64(attempt)))
 							// Add jitter (up to 10% of the backoff delay)
-							jitter := time.Duration(rand.Float64() * float64(backoffDelay) * 0.1)
+							jitter := time.Duration(secureRandFloat64() * float64(backoffDelay) * 0.1)
 							totalDelay := backoffDelay + jitter
 							time.Sleep(totalDelay)
 						}
@@ -347,7 +367,7 @@ func (n *Node) runBatchParallel(shared *SharedState, data interface{}) string {
 
 	// Store results in shared state
 	shared.Set("batch_results", results)
-	return "batch_complete"
+	return BatchCompleteAction
 }
 
 // Helper methods for parameter extraction

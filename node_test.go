@@ -119,7 +119,7 @@ func TestAdaptiveBatchBehavior(t *testing.T) {
 
 	result := node.Run(state)
 
-	if result != "batch_complete" {
+	if result != BatchCompleteAction {
 		t.Errorf("Expected 'batch_complete', got '%s'", result)
 	}
 
@@ -168,7 +168,7 @@ func TestAdaptiveParallelBehavior(t *testing.T) {
 	result := node.Run(state)
 	elapsed := time.Since(start)
 
-	if result != "batch_complete" {
+	if result != BatchCompleteAction {
 		t.Errorf("Expected 'batch_complete', got '%s'", result)
 	}
 
@@ -228,7 +228,7 @@ func TestComposedRetryBatch(t *testing.T) {
 
 	result := node.Run(state)
 
-	if result != "batch_complete" {
+	if result != BatchCompleteAction {
 		t.Errorf("Expected 'batch_complete', got '%s'", result)
 	}
 
@@ -265,7 +265,7 @@ func TestComposedBatchParallel(t *testing.T) {
 	result := node.Run(state)
 	elapsed := time.Since(start)
 
-	if result != "batch_complete" {
+	if result != BatchCompleteAction {
 		t.Errorf("Expected 'batch_complete', got '%s'", result)
 	}
 
@@ -319,7 +319,7 @@ func TestComposedAll(t *testing.T) {
 	result := node.Run(state)
 	elapsed := time.Since(start)
 
-	if result != "batch_complete" {
+	if result != BatchCompleteAction {
 		t.Errorf("Expected 'batch_complete', got '%s'", result)
 	}
 
@@ -362,7 +362,7 @@ func TestParameterPrecedence(t *testing.T) {
 
 	result := node.Run(state)
 
-	if result != "batch_complete" {
+	if result != BatchCompleteAction {
 		t.Errorf("Expected batch execution, got '%s'", result)
 	}
 
@@ -427,7 +427,7 @@ func TestEdgeCases(t *testing.T) {
 
 		result := node.Run(state)
 
-		if result != "batch_complete" {
+		if result != BatchCompleteAction {
 			t.Errorf("Expected 'batch_complete', got '%s'", result)
 		}
 
@@ -468,7 +468,7 @@ func TestEdgeCases(t *testing.T) {
 
 		result := node.Run(state)
 
-		if result != "batch_complete" {
+		if result != BatchCompleteAction {
 			t.Errorf("Expected 'batch_complete', got '%s'", result)
 		}
 
