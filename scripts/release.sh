@@ -14,7 +14,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CHANGELOG_FILE="$REPO_ROOT/CHANGELOG.md"
 GO_MOD_FILE="$REPO_ROOT/go.mod"
 EXAMPLES_DIR="$REPO_ROOT/examples"
