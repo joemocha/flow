@@ -25,13 +25,13 @@ linters:
     - unparam
     - nakedret
     - prealloc
-    - exportloopref
+    - copyloopvar
     - nilerr
 
 linters-settings:
   gocyclo:
     min-complexity: 15
-  
+
   gocritic:
     enabled-tags:
       - diagnostic
@@ -45,7 +45,7 @@ linters-settings:
       - octalLiteral
       - whyNoLint
       - wrapperFunc
-  
+
   revive:
     rules:
       - name: exported
@@ -62,11 +62,11 @@ issues:
         - errcheck
         - dupl
         - gosec
-    
+
     # Exclude known linters from partially hard-to-fix issues
     - linters:
         - gocritic
       text: "unnecessaryDefer:"
-  
+
   max-issues-per-linter: 0
   max-same-issues: 0
