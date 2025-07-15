@@ -58,6 +58,8 @@ OPTIONS:
     --skip-tests        Skip running tests (not recommended)
     --skip-examples     Skip building examples
     --pre-release TYPE  Create pre-release with suffix (alpha, beta, rc)
+    -m, --message TEXT  Custom release description (overrides auto-generated)
+    --message-file FILE Read release description from file
 
 EXAMPLES:
     ./scripts/release.sh patch              # Create next patch version (e.g., v1.0.1)
@@ -66,6 +68,8 @@ EXAMPLES:
     ./scripts/release.sh --dry-run patch    # Preview what would happen
     ./scripts/release.sh --check-only       # Run pre-release checks only
     ./scripts/release.sh minor --pre-release rc  # Create v1.1.0-rc.1
+    ./scripts/release.sh patch -m "Fix critical bug in retry logic"  # Custom description
+    ./scripts/release.sh minor --message-file RELEASE_NOTES.md      # Description from file
 
 RELEASE TYPES:
     - patch: Bug fixes, performance improvements, documentation
@@ -83,6 +87,8 @@ SKIP_TESTS=false
 SKIP_EXAMPLES=false
 RELEASE_TYPE=""
 PRE_RELEASE=""
+CUSTOM_MESSAGE=""
+MESSAGE_FILE=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -116,6 +122,24 @@ while [[ $# -gt 0 ]]; do
                 shift 2
             else
                 log_error "--pre-release requires a type (alpha, beta, rc)"
+                exit 1
+            fi
+            ;;
+        -m|--message)
+            if [[ -n "$2" && ! "$2" =~ ^- ]]; then
+                CUSTOM_MESSAGE="$2"
+                shift 2
+            else
+                log_error "--message requires a description text"
+                exit 1
+            fi
+            ;;
+        --message-file)
+            if [[ -n "$2" && ! "$2" =~ ^- ]]; then
+                MESSAGE_FILE="$2"
+                shift 2
+            else
+                log_error "--message-file requires a file path"
                 exit 1
             fi
             ;;
@@ -226,6 +250,53 @@ validate_release_type() {
             exit 1
             ;;
     esac
+}
+
+# Get release description
+get_release_description() {
+    local version="$1"
+
+    # Priority: custom message > message file > interactive input > auto-generated
+    if [[ -n "$CUSTOM_MESSAGE" ]]; then
+        echo "$CUSTOM_MESSAGE"
+        return
+    fi
+
+    if [[ -n "$MESSAGE_FILE" ]]; then
+        if [[ -f "$MESSAGE_FILE" ]]; then
+            cat "$MESSAGE_FILE"
+            return
+        else
+            log_error "Message file not found: $MESSAGE_FILE"
+            exit 1
+        fi
+    fi
+
+    # Interactive input (only if not in force mode and not dry run)
+    if [[ "$FORCE" != "true" && "$DRY_RUN" != "true" ]]; then
+        echo
+        log_info "Enter release description for $version (press Ctrl+D when done):"
+        log_info "Leave empty to auto-generate from git commits"
+        echo
+
+        local description
+        description=$(cat)
+
+        if [[ -n "$description" ]]; then
+            echo "$description"
+            return
+        fi
+    fi
+
+    # Auto-generate from git commits
+    local previous_tag
+    previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+    if [[ -n "$previous_tag" ]]; then
+        git log --pretty=format:"- %s" "$previous_tag"..HEAD | grep -v "^- chore:" | head -20
+    else
+        git log --pretty=format:"- %s" --max-count=10 | grep -v "^- chore:"
+    fi
 }
 
 # Check if we're in a git repository
@@ -382,22 +453,22 @@ update_changelog() {
     local release_date
     release_date=$(date +%Y-%m-%d)
 
-    # Generate changelog entries from git commits
+    # Get release description
     local changelog_entries
-    local previous_tag
-    previous_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-
-    if [[ -n "$previous_tag" ]]; then
-        log_info "Generating changelog from commits since $previous_tag..."
-        changelog_entries=$(git log --pretty=format:"- %s" "$previous_tag"..HEAD | grep -v "^- chore:" | head -20)
+    if [[ -n "$CUSTOM_MESSAGE" ]]; then
+        log_info "Using custom release message..."
+        changelog_entries="$CUSTOM_MESSAGE"
+    elif [[ -n "$MESSAGE_FILE" ]]; then
+        log_info "Using release message from file: $MESSAGE_FILE"
+        changelog_entries=$(get_release_description "$version")
     else
-        log_info "No previous tags found, using recent commits..."
-        changelog_entries=$(git log --pretty=format:"- %s" --max-count=10 | grep -v "^- chore:")
-    fi
+        log_info "Getting release description..."
+        changelog_entries=$(get_release_description "$version")
 
-    # If no meaningful commits, use a default entry
-    if [[ -z "$changelog_entries" ]]; then
-        changelog_entries="- Release $version"
+        # If still empty, use default
+        if [[ -z "$changelog_entries" ]]; then
+            changelog_entries="- Release $version"
+        fi
     fi
 
     # Create updated changelog
@@ -409,8 +480,16 @@ update_changelog() {
         echo ""
         echo "## [$version] - $release_date"
         echo ""
-        echo "### Added"
-        echo "$changelog_entries"
+
+        # Format the changelog entries
+        if [[ "$changelog_entries" =~ ^- ]]; then
+            # Already formatted as bullet points
+            echo "### Added"
+            echo "$changelog_entries"
+        else
+            # Plain text, add as description
+            echo "$changelog_entries"
+        fi
         echo ""
 
         # Copy the rest, skipping the [Unreleased] line
@@ -465,6 +544,12 @@ main() {
     if [[ "$CHECK_ONLY" != "true" && -z "$RELEASE_TYPE" ]]; then
         log_error "Release type is required unless using --check-only"
         show_help
+        exit 1
+    fi
+
+    # Validate message options
+    if [[ -n "$CUSTOM_MESSAGE" && -n "$MESSAGE_FILE" ]]; then
+        log_error "Cannot specify both --message and --message-file"
         exit 1
     fi
 
