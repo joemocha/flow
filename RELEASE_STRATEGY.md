@@ -48,28 +48,34 @@ Before creating any release:
 
 ### 3. Release Commands
 
+Use the automated release script in the `scripts/` directory:
+
 ```bash
-# 1. Ensure clean working directory
-git status
+# 1. Create a patch release (bug fixes)
+./scripts/release.sh patch
 
-# 2. Update version and changelog
-# Edit CHANGELOG.md with new version info
+# 2. Create a minor release (new features)
+./scripts/release.sh minor
 
-# 3. Commit version changes
-git add .
-git commit -m "chore: prepare for vX.Y.Z release"
+# 3. Create a major release (breaking changes)
+./scripts/release.sh major
 
-# 4. Create and push tag
-git tag vX.Y.Z
-git push origin main
-git push origin vX.Y.Z
+# 4. Create a pre-release
+./scripts/release.sh minor --pre-release rc
 
-# 5. GitHub Actions will automatically:
-#    - Run full test suite
-#    - Create GitHub release
-#    - Build and attach examples
-#    - Generate changelog
+# 5. Preview changes (recommended first)
+./scripts/release.sh --dry-run patch
+
+# 6. Run only pre-release checks
+./scripts/release.sh --check-only
 ```
+
+The script automatically:
+- Calculates the next version from git tags
+- Validates all pre-release requirements
+- Updates CHANGELOG.md with git commit messages
+- Creates and pushes the git tag
+- Triggers GitHub Actions for release creation
 
 ## 🚀 Publication Channels
 
