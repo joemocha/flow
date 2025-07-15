@@ -12,7 +12,7 @@ Flow is a workflow orchestration library that uses a single adaptive node system
 
 ### Single Adaptive Node System
 
-**Node** (`flow/node.go:9-313`): A single node type that adapts behavior based on parameters. Reduces the need for multiple node types through parameter detection.
+**Node**: A single node type that adapts behavior based on parameters. Reduces the need for multiple node types through parameter detection.
 
 ```go
 type Node struct {
@@ -24,9 +24,9 @@ type Node struct {
 }
 ```
 
-**Flow** (`flow/flow.go:3-67`): Orchestrator that works with the unified Node type. Handles sequential traversal and action-based routing.
+**Flow**: Orchestrator that works with the unified Node type. Handles sequential traversal and action-based routing.
 
-**SharedState** (`flow/shared_state.go:8-59`): Thread-safe state container for data sharing between nodes with typed getters and collection operations.
+**SharedState**: Thread-safe state container for data sharing between nodes with typed getters and collection operations.
 
 ### Adaptive Behavior Detection
 
@@ -109,7 +109,7 @@ result := node.Run(state) // Automatic: batch + parallel + retry
 
 ## Comprehensive Test Suite
 
-**Test Coverage** (`flow/node_test.go:1-532`): 11 test functions + 3 benchmarks covering all adaptive behaviors:
+**Test Coverage**: 11 test functions + 3 benchmarks covering all adaptive behaviors:
 
 - ✅ Basic node execution and parameter handling
 - ✅ Automatic retry detection and execution patterns
@@ -146,9 +146,3 @@ Suitable for intelligent agent construction:
 - **Input Processing**: Retry-enabled parsing with fallback
 - **Tool Execution**: Parallel batch processing with retry
 - **Response Generation**: Flow chains with adaptive nodes
-
-## Implementation
-
-- **Go**: Revolutionary adaptive implementation with full parameter-driven composability (`flow/` directory)
-
-Flow advances PocketFlow's constraint-based philosophy while maintaining its elegant simplicity through parameter-driven behavior composition.

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-07-14
 
 ### Added
-- **Revolutionary adaptive node system** - Single node type that adapts behavior based on parameters
+- **Adaptive node system** - Single node type that adapts behavior based on parameters
 - **Automatic batch processing** - Set `batch: true` with `data` parameter for collection processing
 - **Automatic retry logic** - Set `retries > 0` for exponential backoff retry behavior
 - **Automatic parallel execution** - Set `parallel: true` for concurrent batch processing
