@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Run tests
+      run: go test -v ./...
+
+    - name: Build examples
+      run: |
+        mkdir -p dist/examples
+        for dir in examples/*/; do
+          example_name=$(basename "$dir")
+          echo "Building example: $example_name"
+          (cd "$dir" && go build -o "../../dist/examples/$example_name" .)
+        done
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        
+        # Generate changelog (simple version)
+        echo "## Changes in $VERSION" > CHANGELOG.md
+        echo "" >> CHANGELOG.md
+        git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> CHANGELOG.md || echo "- Initial release" >> CHANGELOG.md
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: Release ${{ steps.changelog.outputs.version }}
+        body_path: CHANGELOG.md
+        files: |
+          dist/examples/*
+        draft: false
+        prerelease: ${{ contains(github.ref, 'rc') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-docs:
+    name: Publish Documentation
+    runs-on: ubuntu-latest
+    needs: release
+    
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23'
+
+    - name: Generate Go docs
+      run: |
+        go doc -all . > API_DOCS.md
+        echo "Documentation updated for release ${{ github.ref_name }}" >> API_DOCS.md

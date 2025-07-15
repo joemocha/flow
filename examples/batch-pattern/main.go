@@ -1,25 +1,25 @@
 package main
 
 import (
-	"fmt"
+"fmt"
 
-	Flow "github.com/joemocha/flow"
+flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := Flow.NewSharedState()
+	state := flow.NewSharedState()
 
 	// Automatic batch processing when batch: true is set
-	node := Flow.NewNode()
+	node := flow.NewNode()
 	node.SetParams(map[string]interface{}{
-		"data":  []int{1, 2, 3, 4, 5},
-		"batch": true,
-	})
+"data":  []int{1, 2, 3, 4, 5},
+"batch": true,
+})
 	node.SetExecFunc(func(item interface{}) (interface{}, error) {
-		// Called once per item automatically!
-		num := item.(int)
-		return fmt.Sprintf("processed-%d", num*2), nil
-	})
+// Called once per item automatically!
+num := item.(int)
+return fmt.Sprintf("processed-%d", num*2), nil
+})
 
 	result := node.Run(state)
 	fmt.Printf("Batch result: %s\n", result)

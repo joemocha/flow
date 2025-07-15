@@ -1,25 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
+"fmt"
+"math/rand"
+"time"
 
-	Flow "github.com/joemocha/flow"
+flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := Flow.NewSharedState()
+	state := flow.NewSharedState()
 
 	// Automatic retry behavior when retries > 0
-	node := Flow.NewNode()
+	node := flow.NewNode()
 	node.SetParams(map[string]interface{}{
-		"retries":     3,
-		"retry_delay": time.Millisecond * 100,
-	})
+"retries":     3,
+"retry_delay": time.Millisecond * 100,
+})
 	node.SetExecFunc(func(prep interface{}) (interface{}, error) {
-		// Just business logic - retry is automatic!
-		if rand.Float32() < 0.7 {
+// Just business logic - retry is automatic!
+if rand.Float32() < 0.7 {
 			return "", fmt.Errorf("API temporarily unavailable")
 		}
 		return "api_success", nil

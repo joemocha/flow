@@ -1,42 +1,42 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
-	"time"
+"fmt"
+"math/rand"
+"time"
 
-	Flow "github.com/joemocha/flow"
+flow "github.com/joemocha/flow"
 )
 
 func main() {
-	state := Flow.NewSharedState()
+	state := flow.NewSharedState()
 
 	// Composed behavior: batch + parallel + retry in single node!
-	node := Flow.NewNode()
+	node := flow.NewNode()
 	node.SetParams(map[string]interface{}{
-		// Batch configuration
-		"data": []string{
-			"https://api1.example.com",
-			"https://api2.example.com",
-			"https://api3.example.com",
-			"https://api4.example.com",
-			"https://api5.example.com",
-		},
-		"batch": true,
-		// Parallel configuration
-		"parallel":       true,
-		"parallel_limit": 2, // Max 2 concurrent requests
-		// Retry configuration
-		"retries":     3,
-		"retry_delay": time.Millisecond * 200,
-	})
+// Batch configuration
+"data": []string{
+"https://api1.example.com",
+"https://api2.example.com", 
+"https://api3.example.com",
+"https://api4.example.com",
+"https://api5.example.com",
+},
+"batch": true,
+// Parallel configuration
+"parallel":       true,
+"parallel_limit": 2, // Max 2 concurrent requests
+// Retry configuration
+"retries":     3,
+"retry_delay": time.Millisecond * 200,
+})
 
 	node.SetExecFunc(func(item interface{}) (interface{}, error) {
-		// Pure business logic - all patterns applied automatically!
-		url := item.(string)
+// Pure business logic - all patterns applied automatically!
+url := item.(string)
 
-		// Simulate API call that might fail
-		if rand.Float32() < 0.6 {
+// Simulate API call that might fail
+if rand.Float32() < 0.6 {
 			return "", fmt.Errorf("failed to fetch %s", url)
 		}
 

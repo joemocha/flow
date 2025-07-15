@@ -8,7 +8,23 @@ import (
 	"time"
 )
 
-// Node is the single adaptive node that changes behavior based on parameters
+// Node is the core adaptive node that automatically changes behavior based on parameters.
+// This single node type eliminates the need for multiple specialized node types by
+// detecting patterns in its parameters and adapting its execution accordingly.
+//
+// Supported Adaptive Behaviors:
+//   - Batch Processing: Set "batch": true with "data" to process collections
+//   - Parallel Execution: Set "parallel": true to enable concurrent processing
+//   - Retry Logic: Set "retries" > 0 to enable automatic retry with exponential backoff
+//   - Composability: All patterns can be combined in a single node
+//
+// Parameter Detection Priority:
+//  1. Batch Processing: "batch": true → process each item in "data"
+//  2. Retry Logic: "retries" > 0 → wrap execution with exponential backoff retry
+//  3. Single Execution: Default behavior
+//
+// The Node maintains a map of parameters, successor nodes for workflow chaining,
+// and optional user-provided functions for custom prep, exec, and post processing.
 type Node struct {
 	params     map[string]interface{}
 	successors map[string]*Node
@@ -19,7 +35,19 @@ type Node struct {
 	postFunc func(*SharedState, interface{}, interface{}) string
 }
 
-// NewNode creates a new adaptive node
+// NewNode creates a new adaptive Node with empty parameters and successors.
+// The returned Node can be configured with parameters and functions to define
+// its behavior and then executed with Run().
+//
+// Example:
+//
+//	node := NewNode()
+//	node.SetParams(map[string]interface{}{"retries": 3})
+//	node.SetExecFunc(func(prep interface{}) (interface{}, error) {
+//		// Your business logic here
+//		return "success", nil
+//	})
+//	result := node.Run(sharedState)
 func NewNode() *Node {
 	return &Node{
 		params:     make(map[string]interface{}),
@@ -27,17 +55,56 @@ func NewNode() *Node {
 	}
 }
 
-// SetParams sets node parameters
+// SetParams configures the node's parameters that control its adaptive behavior.
+// Parameters determine which execution patterns the node will use:
+//   - "batch": true - enables batch processing of "data" parameter
+//   - "parallel": true - enables parallel execution (requires "batch": true)
+//   - "parallel_limit": int - limits concurrent goroutines (default: 10)
+//   - "retries": int - enables retry logic with exponential backoff
+//   - "retry_delay": time.Duration - base delay for retry backoff
+//   - "data": []interface{} - data to process in batch mode
+//
+// Example:
+//
+//	node.SetParams(map[string]interface{}{
+//		"data": []int{1, 2, 3, 4, 5},
+//		"batch": true,
+//		"parallel": true,
+//		"retries": 3,
+//	})
 func (n *Node) SetParams(params map[string]interface{}) {
 	n.params = params
 }
 
-// GetParam gets a parameter value
+// GetParam retrieves a parameter value by key.
+// Returns nil if the parameter doesn't exist.
+//
+// Example:
+//
+//	retries := node.GetParam("retries")
+//	if retries != nil {
+//		retriesInt := retries.(int)
+//	}
 func (n *Node) GetParam(key string) interface{} {
 	return n.params[key]
 }
 
-// Next sets the next node for a given action
+// Next establishes a connection to another node for workflow chaining.
+// The connection is triggered when this node's execution returns the specified action string.
+// If action is empty, "default" is used.
+//
+// Parameters:
+//   - node: The target Node to connect to
+//   - action: The action string that triggers this connection
+//
+// Returns:
+//   - *Node: The target node (for method chaining)
+//
+// Example:
+//
+//	processor.Next(validator, "processed")
+//	validator.Next(success, "valid")
+//	validator.Next(failure, "invalid")
 func (n *Node) Next(node *Node, action string) *Node {
 	if action == "" {
 		action = "default"
@@ -46,7 +113,8 @@ func (n *Node) Next(node *Node, action string) *Node {
 	return node
 }
 
-// GetSuccessors returns all successors
+// GetSuccessors returns a map of all successor nodes keyed by their action strings.
+// This is primarily used internally by Flow for traversal.
 func (n *Node) GetSuccessors() map[string]*Node {
 	return n.successors
 }
