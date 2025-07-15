@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.1.0] - 2025-07-15
+
+### Added
+- refactor: streamline release commands in documentation
+- fix: correct repository root path in release script
+- feat: add release script with semantic keywords
+- refactor: Simplify descriptions in documentation for Node, Flow, and SharedState
+- refactor: Improve code readability by reordering imports and adjusting formatting in examples
+- fix: Update Gosec action to a specific version for improved stability
+- feat: Introduce constants for default actions and enhance retry logic with secure random jitter
+- feat: Add comprehensive release strategy document for Flow library
+- Update retry configuration: replace 'retry_max' with 'retries' for improved clarity and implement exponential backoff with jitter in retry logic
+
+
 ## [1.0.0] - 2025-07-14
 
 ### Added
