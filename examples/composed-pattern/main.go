@@ -17,11 +17,11 @@ func main() {
 	node.SetParams(map[string]interface{}{
 		// Batch configuration
 		"data": []string{
-			"https://api1.example.com",
-			"https://api2.example.com",
-			"https://api3.example.com",
-			"https://api4.example.com",
-			"https://api5.example.com",
+			"https://www.google.com",
+			"https://www.bing.com",
+			"https://www.yahoo.com",
+			"https://www.theverge.com",
+			"https://www.news.com",
 		},
 		"batch": true,
 		// Parallel configuration
