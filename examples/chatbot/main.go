@@ -12,28 +12,30 @@ import (
 	"github.com/openai/openai-go/option"
 )
 
-func main() {
-	fmt.Println("OpenRouter.ai Chatbot Example using Flow")
-	fmt.Println("Type 'quit' to exit")
-
-	// Check for OpenRouter API key
+// setupOpenAIClient initializes the OpenAI client with OpenRouter configuration
+func setupOpenAIClient() (openai.Client, error) {
 	apiKey := os.Getenv("OPENROUTER_API_KEY")
 	if apiKey == "" {
-		fmt.Println("Error: OPENROUTER_API_KEY environment variable is required")
-		os.Exit(1)
+		return openai.Client{}, fmt.Errorf("OPENROUTER_API_KEY environment variable is required")
 	}
 
-	// Initialize OpenAI client with OpenRouter configuration
 	client := openai.NewClient(
 		option.WithAPIKey(apiKey),
 		option.WithBaseURL("https://openrouter.ai/api/v1"),
 	)
 
-	state := flow.NewSharedState()
-	state.Set("conversation_history", []openai.ChatCompletionMessageParamUnion{})
-	state.Set("client", client)
+	return client, nil
+}
 
-	// Create chatbot node with retry capability
+// initializeConversation sets up the initial conversation history with system message
+func initializeConversation() []openai.ChatCompletionMessageParamUnion {
+	return []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage("You are a helpful AI assistant. Be concise and friendly in your responses."),
+	}
+}
+
+// createChatNode creates and configures the chat node with execution logic
+func createChatNode(client openai.Client, state *flow.SharedState) *flow.Node {
 	chatNode := flow.NewNode()
 	chatNode.SetParams(map[string]interface{}{
 		"retries": 2,
@@ -42,8 +44,7 @@ func main() {
 	chatNode.SetExecFunc(func(prep interface{}) (interface{}, error) {
 		userInput := prep.(string)
 
-		// Get client and conversation history from state
-		client := state.Get("client").(openai.Client)
+		// Get conversation history from state (client is passed as parameter)
 		history := state.Get("conversation_history").([]openai.ChatCompletionMessageParamUnion)
 
 		// Add user message to conversation history
@@ -70,6 +71,27 @@ func main() {
 
 		return response, nil
 	})
+
+	return chatNode
+}
+
+func main() {
+	fmt.Println("OpenRouter.ai Chatbot Example using Flow")
+	fmt.Println("Type 'quit' to exit")
+
+	// Setup OpenAI client
+	client, err := setupOpenAIClient()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Setup shared state with conversation history
+	state := flow.NewSharedState()
+	state.Set("conversation_history", initializeConversation())
+
+	// Create chatbot node with retry capability
+	chatNode := createChatNode(client, state)
 
 	scanner := bufio.NewScanner(os.Stdin)
 
