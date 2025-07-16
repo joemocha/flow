@@ -174,8 +174,8 @@ func main() {
 flowchart TD
     A[Start] --> B[Create SharedState]
     B --> C[Create Adaptive Node]
-    C --> D[Set Parameters<br/>data: [1,2,3,4,5]<br/>batch: true]
-    D --> E[Set ExecFunc<br/>Process Item Logic]
+    C --> D["Set Parameters<br/>data: 1,2,3,4,5<br/>batch: true"]
+    D --> E["Set ExecFunc<br/>Process Item Logic"]
     E --> F[Run Node]
     F --> G{Check Parameters}
     G -->|batch = true| H[Enable Batch Processing]
@@ -260,8 +260,8 @@ func main() {
 flowchart TD
     A[Start] --> B[Create SharedState]
     B --> C[Create Adaptive Node]
-    C --> D[Set Parameters<br/>data: [url1,url2,url3,url4,url5]<br/>batch: true<br/>parallel: true<br/>parallel_limit: 2<br/>retries: 3<br/>retry_delay: 200ms]
-    D --> E[Set ExecFunc<br/>fetchURL Logic]
+    C --> D["Set Parameters<br/>data: url1,url2,url3,url4,url5<br/>batch: true, parallel: true<br/>parallel_limit: 2, retries: 3<br/>retry_delay: 200ms"]
+    D --> E["Set ExecFunc<br/>fetchURL Logic"]
     E --> F[Run Node]
     F --> G{Check Parameters}
     G --> H[Enable All Patterns:<br/>Batch + Parallel + Retry]
@@ -373,8 +373,8 @@ flowchart TD
     F1 --> G{Check Action}
     G -->|continue| D2[Step2: Adaptive Node]
 
-    D2 --> E2[Set Parameters<br/>data: [1,2,3,4,5]<br/>batch: true<br/>parallel: true]
-    E2 --> F2[ExecFunc: Square Numbers]
+    D2 --> E2["Set Parameters<br/>data: 1,2,3,4,5<br/>batch: true, parallel: true"]
+    E2 --> F2["ExecFunc: Square Numbers"]
     F2 --> H2[Parallel Processing]
 
     H2 --> I21[Goroutine 1: 1² = 1]
@@ -678,8 +678,8 @@ flowchart TD
     I1 --> J{Check Action}
     J -->|needs_tools| D2[Tool Node: Adaptive Node]
 
-    D2 --> E2[Set Parameters<br/>data: ['search', 'calculator', 'weather']<br/>batch: true<br/>parallel: true<br/>retries: 3]
-    E2 --> F2[ExecFunc: executeTool]
+    D2 --> E2["Set Parameters<br/>data: search, calculator, weather<br/>batch: true, parallel: true<br/>retries: 3"]
+    E2 --> F2["ExecFunc: executeTool"]
     F2 --> G2[Parallel Tool Execution]
 
     G2 --> H21[Goroutine 1: Search Tool]
